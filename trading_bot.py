@@ -949,5 +949,27 @@ def main():
 
         time.sleep(max(1, LOOP_SECONDS - elapsed))
 
+# ============================================================
+# RENDER WEB SERVICE
+# ============================================================
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class PingHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"Bot is alive")
+    def log_message(self, format, *args):
+        pass
+
+def run_web_server():
+    port = int(os.getenv("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), PingHandler)
+    print(f"[Web] Listening on port {port}")
+    server.serve_forever()
+
 if __name__ == "__main__":
+    web_thread = threading.Thread(target=run_web_server, daemon=True)
+    web_thread.start()
     main()
